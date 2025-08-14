@@ -1,8 +1,8 @@
 package routes
 
 import (
-	"ubm-canteen/handlers"
-	"ubm-canteen/middleware"
+	"higo-iot/handlers"
+
 	"github.com/gofiber/fiber/v2"
 )
 

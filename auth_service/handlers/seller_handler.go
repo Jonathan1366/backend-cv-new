@@ -3,11 +3,11 @@ package handlers
 import (
 	"context"
 	"fmt"
+	entity "higo-iot/models"
+	"higo-iot/utils"
 	"os"
 	"strings"
 	"time"
-	entity "ubm-canteen/models"
-	"ubm-canteen/utils"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -63,46 +63,46 @@ func (h *SellerHandler) RegisterSeller(c *fiber.Ctx) error {
 		})
 	}
 
-	// HASH PASSWORD
-	hashedPass, err := utils.HashPass(input.Password)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"code":   500,
-			"status": "Failed to hash password",
-		})
-	}
+	// // HASH PASSWORD
+	// hashedPass, err := utils.HashPass(input.Password)
+	// if err != nil {
+	// 	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+	// 		"code":   500,
+	// 		"status": "Failed to hash password",
+	// 	})
+	// }
 
 	seller := entity.Seller{
 		IdSeller:   uuid.New(),
 		NamaSeller: input.NamaSeller,
 		Email:      input.Email,
-		Password:   hashedPass, // Assume password is hashed
+		// Password:   hashedPass, // Assume password is hashed
 		PhoneNum:   input.PhoneNum,
 	}
 
-	//SAVE SELLER TO DATABASE
-	conn, err := h.DB.Acquire(ctx)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": fmt.Sprintf("Gagal mendapatkan koneksi: %v", err),
-		})
-	}
+	// //SAVE SELLER TO DATABASE
+	// conn, err := h.DB.Acquire(ctx)
+	// if err != nil {
+	// 	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+	// 		"error": fmt.Sprintf("Gagal mendapatkan koneksi: %v", err),
+	// 	})
+	// }
 	
-	defer conn.Release() // MAKE SURE TO RELEASE CONNECTION TO POOL
-	// EXECUTE PREPARE STATEMENT FOR REGISTER SELLER
-	query := `INSERT INTO seller (id_seller, nama_seller, email, password, phone_num) VALUES ($1, $2, $3, $4, $5)`
-	_, err = conn.Exec(ctx, query, seller.IdSeller, seller.NamaSeller, seller.Email, hashedPass, seller.PhoneNum)
-	if err != nil {
-		if strings.Contains(err.Error(), "duplicate key value") {
-			return c.Status(fiber.StatusConflict).JSON(fiber.Map{
-				"status":  "error",
-				"message": "Email already exist",
-			})
-		}
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": fmt.Sprintf("Failed to register seller: %v", err),
-		})
-	}
+	// defer conn.Release() // MAKE SURE TO RELEASE CONNECTION TO POOL
+	// // EXECUTE PREPARE STATEMENT FOR REGISTER SELLER
+	// query := `INSERT INTO seller (id_seller, nama_seller, email, password, phone_num) VALUES ($1, $2, $3, $4, $5)`
+	// _, err = conn.Exec(ctx, query, seller.IdSeller, seller.NamaSeller, seller.Email, hashedPass, seller.PhoneNum)
+	// if err != nil {
+	// 	if strings.Contains(err.Error(), "duplicate key value") {
+	// 		return c.Status(fiber.StatusConflict).JSON(fiber.Map{
+	// 			"status":  "error",
+	// 			"message": "Email already exist",
+	// 		})
+	// 	}
+	// 	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+	// 		"error": fmt.Sprintf("Failed to register seller: %v", err),
+	// 	})
+	// }
 
 	// go func() {
 	// 	err := utils.SendOTPwithTwilio(input.PhoneNum)
@@ -170,12 +170,12 @@ func (h *SellerHandler) LoginSeller(c *fiber.Ctx) error {
 		})
 	}
 
-	// VERIFY HASHED PASSWORD
-	if !utils.CheckPassHash(seller.Password, dbseller.Password) {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"error": "Invalid password",
-		})
-	}
+	// // VERIFY HASHED PASSWORD
+	// if !utils.CheckPassHash(seller.Password, dbseller.Password) {
+	// 	return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+	// 		"error": "Invalid password",
+	// 	})
+	// }
 	
 	//JWT TOKEN
 	tokenString, err:= utils.GenerateToken(dbseller.IdSeller.String(), dbseller.Email, "seller")
@@ -200,21 +200,21 @@ func (h *SellerHandler) LoginSeller(c *fiber.Ctx) error {
 		})
 	}
 
-	//SAVE TOKEN TO REDIS
-	err = utils.RedisClient.Set(ctx, "token:"+dbseller.IdSeller.String(), tokenString, time.Hour*24).Err()
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "failed to store token in Redis",
-		})
-	}
+	// //SAVE TOKEN TO REDIS
+	// err = utils.RedisClient.Set(ctx, "token:"+dbseller.IdSeller.String(), tokenString, time.Hour*24).Err()
+	// if err != nil {
+	// 	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+	// 		"error": "failed to store token in Redis",
+	// 	})
+	// }
 
-	//SAVE REFRESH TOKEN TO REDIS
-	err = utils.RedisClient.Set(ctx, "refresh token:"+dbseller.IdSeller.String(), refreshTokenString, time.Hour*24*30).Err()
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "failed to store refresh token in Redis",
-		})
-	}
+	// //SAVE REFRESH TOKEN TO REDIS
+	// err = utils.RedisClient.Set(ctx, "refresh token:"+dbseller.IdSeller.String(), refreshTokenString, time.Hour*24*30).Err()
+	// if err != nil {
+	// 	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+	// 		"error": "failed to store refresh token in Redis",
+	// 	})
+	// }
 	
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"status":  "Success",
@@ -366,15 +366,15 @@ func (h *SellerHandler) LogoutSeller(c *fiber.Ctx) error {
 		})
 	}
 
-	// DELETE TOKEN FROM REDIS (perbaikan: hilangkan space)
-	ctx := c.Context()
-	err = utils.RedisClient.Del(ctx, "token:"+idSeller.String()).Err()
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"status":  "error",
-			"message": "failed to delete token from Redis",
-		})
-	}
+	// // DELETE TOKEN FROM REDIS (perbaikan: hilangkan space)
+	// ctx := c.Context()
+	// err = utils.RedisClient.Del(ctx, "token:"+idSeller.String()).Err()
+	// if err != nil {
+	// 	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+	// 		"status":  "error",
+	// 		"message": "failed to delete token from Redis",
+	// 	})
+	// }
 
 	// Input token to revocation list (perbaikan: tambah entityType parameter)
 	err = h.TokenRevocationLogic(idSeller, "seller", token)

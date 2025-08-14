@@ -2,7 +2,7 @@ package repository
 
 import (
 	"context"
-	entity "ubm-canteen/models"
+	entity "higo-iot/models"
 )
 
 type SellerRepository interface {

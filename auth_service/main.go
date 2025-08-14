@@ -1,12 +1,12 @@
 package main
 
 import (
-	"log"
-	"os"
 	db_drivers "higo-iot/db/db_drivers"
 	"higo-iot/handlers"
-	"higo-iot/internal/usecase"
 	"higo-iot/routes"
+	"log"
+	"os"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/jackc/pgx/v5"
 	"github.com/spf13/viper"
@@ -15,14 +15,13 @@ import (
 func main() {
 
 		viper.AutomaticEnv()
-		utils.InitRedis()
 		
-		err:= usecase.InitTextractClient("ap-southeast-1")
-		if err != nil {
-			log.Fatalf("Failed to initialize textract client: %v", err)
-		} 
+		// err:= usecase.InitTextractClient("ap-southeast-1")
+		// if err != nil {
+		// 	log.Fatalf("Failed to initialize textract client: %v", err)
+		// } 
 
-		s3Bucket := utils.Presigner(utils.Presigner{})
+		// s3Bucket := utils.Presigner(utils.Presigner{})
 
 		//inisialisasi aplikasi fiber dengan konfigurasi khusus
 		app := fiber.New(fiber.Config{
@@ -45,10 +44,10 @@ func main() {
 
 		baseHandler:= &handlers.BaseHandler{
 			DB: dbPool,	
-			RedisClient: utils.RedisClient,
+			// RedisClient: utils.RedisClient,
 			DefaultQueryExecMode: pgx.QueryExecModeExec,
-			Presigner: s3Bucket,
-			JWTSecret: jwtSecret,
+			// Presigner: s3Bucket,
+			// JWTSecret: jwtSecret,
 		}
 
 		// userHandler:= handlers.NewUserHandlers(baseHandler)
