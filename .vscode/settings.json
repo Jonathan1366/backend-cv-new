@@ -1,0 +1,34 @@
+// {
+//   "postman.settings.dotenv-detection-notification-visibility": false
+// }
+
+
+{
+    "go.useLanguageServer": true,
+    "go.languageServerExperimentalFeatures": {
+        "diagnostics": true,
+        "documentLink": true
+    },
+    "go.lintTool": "golangci-lint",
+    "go.lintFlags": [
+        "--enable-all",
+        "--disable=lll,gochecknoglobals,gochecknoinits"
+    ],
+    "go.formatTool": "goimports",
+    "go.autocompleteUnimportedPackages": true,
+    "go.gocodePackageLookupMode": "go",
+    "go.inferGopath": false,
+    "go.useGoProxyToCheckForToolUpdates": false,
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": true
+    },
+    "[go]": {
+        "editor.insertSpaces": true,
+        "editor.tabSize": 4,
+        "editor.defaultFormatter": "golang.go"
+    },
+    "files.eol": "\n",
+    "cloudcode.gke.cluster": "",
+    "cloudcode.project": "your-gcp-project-id"
+}
