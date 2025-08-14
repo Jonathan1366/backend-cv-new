@@ -1,23 +1,32 @@
-# Stage 1: Build
+# Stage 1: Build the Go application
 FROM golang:1.24 AS builder
+
+# Setel direktori kerja di dalam container
 WORKDIR /app
 
-# Salin hanya file mod & sum untuk caching dependensi
-COPY auth_service/go.mod auth_service/go.sum ./
+# Salin go.mod dan go.sum ke direktori kerja terlebih dahulu
+COPY go.mod go.sum ./
+
+# Unduh dependencies
 RUN go mod download
 
-# Build aplikasi
-RUN go build -o /app/out .
+# Salin semua file proyek ke dalam container
+COPY . .
 
-# Stage 2: Final image
+# Build aplikasi Go
+RUN go build -o out .
+
+# Stage 2: Jalankan aplikasi
 FROM debian:stable-slim
+
+# Setel direktori kerja untuk runtime
 WORKDIR /root/
 
-# Salin binary yang sudah dicompile dari stage builder
+# Salin binary dari stage builder
 COPY --from=builder /app/out .
 
-# EXPOSE port yang akan didengarkan oleh aplikasi Go Anda (BUKAN port database)
+# Expose port
 EXPOSE 8080
+
+# Jalankan aplikasi
 CMD ["./out"]
-
-
